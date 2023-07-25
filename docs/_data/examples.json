@@ -262,5 +262,16 @@
         "code": "/examples/pieChart-vl.html"
       }
     ]
+  },
+  "choropleth_map": {
+    "title": "Choropleth Map",
+    "img": "/img/choroplethMap.JPG",
+    "url": "/gallery/choroplethMap.html",
+    "adapters": [
+      {
+        "name": "Vega-Lite",
+        "code": "/examples/choroplethMap-vl.html"
+      }
+    ]
   }
 }
