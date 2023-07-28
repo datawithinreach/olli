@@ -48,6 +48,9 @@ export function nodeToDescription(
           return 'dotplot';
         }
       }
+      if (olliSpec.mark === 'geoshape') {
+          return 'geographic map'
+      }
       return `${olliSpec.mark} chart`;
     } else {
       return 'dataset';
@@ -84,7 +87,8 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
-        const guideType = node.nodeType === 'xAxis' ? 'x-axis' : node.nodeType === 'yAxis' ? 'y-axis' : 'legend';
+      case 'detail':
+        const guideType = node.nodeType === 'xAxis' ? 'x-axis' : node.nodeType === 'yAxis' ? 'y-axis' : node.nodeType ;
         return `${guideType} titled ${node.groupby}`;
       default:
         throw `Node type ${node.nodeType} does not have the 'name' token.`;
@@ -118,13 +122,15 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
-        const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
+      case 'detail':
+        // const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
         if ('groupby' in node) {
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
           if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
             const guide =
               olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
-              olliSpec.legends?.find((legend) => legend.field === node.groupby);
+              olliSpec.legends?.find((legend) => legend.field === node.groupby) ||
+              olliSpec.details?.find((detail) => detail.field === node.groupby);
             const bins = getBins(node.groupby, dataset, olliSpec.fields);
             if (bins.length) {
               return `for a ${'scaleType' in guide ? guide.scaleType || fieldDef.type : fieldDef.type} scale`;
@@ -162,14 +168,16 @@ export function nodeToDescription(
       case 'xAxis':
       case 'yAxis':
       case 'legend':
-        const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
+      case 'detail':
+        // const guideType = node.nodeType === 'xAxis' ? 'X-axis' : node.nodeType === 'yAxis' ? 'Y-axis' : 'Legend';
         if ('groupby' in node) {
           const fieldDef = getFieldDef(node.groupby, olliSpec.fields);
           let first, last;
           if (fieldDef.type === 'quantitative' || fieldDef.type === 'temporal') {
-            const guide =
-              olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
-              olliSpec.legends?.find((legend) => legend.field === node.groupby);
+            // const guide =
+            //   olliSpec.axes?.find((axis) => axis.field === node.groupby) ||
+            //   olliSpec.legends?.find((legend) => legend.field === node.groupby) ||
+            //   olliSpec.details?.find((detail) => detail.field === node.groupby);
             const bins = getBins(node.groupby, dataset, olliSpec.fields);
             if (bins.length) {
               first = fmtValue(bins[0][0]);
@@ -178,10 +186,11 @@ export function nodeToDescription(
             }
           } else {
             const domain = getDomain(node.groupby, dataset);
+            console.log('node, domain, dataset', node, domain, dataset);
             if (domain.length) {
               first = fmtValue(domain[0]);
               last = fmtValue(domain[domain.length - 1]);
-              return `with ${pluralize(domain.values.length, 'value')} from ${first} to ${last}`;
+              return `with ${pluralize(domain.length, 'value')} from ${first} to ${last}`;
             }
           }
         }
@@ -242,6 +251,7 @@ export function nodeToDescription(
     ['xAxis', ['name', 'type', 'data']],
     ['yAxis', ['name', 'type', 'data']],
     ['legend', ['name', 'type', 'data']],
+    ['detail', ['name', 'type', 'data']],
     ['filteredData', ['index', 'data', 'size']],
     ['annotations', ['size']],
     ['other', ['index', 'data', 'size']],

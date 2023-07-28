@@ -10,7 +10,7 @@ export interface OlliDatum {
 
 export type OlliDataset = OlliDatum[];
 
-export type OlliMark = 'point' | 'bar' | 'line';
+export type OlliMark = 'point' | 'bar' | 'line' | 'geoshape';
 
 /**
  * Spec describing a visualization
@@ -25,6 +25,7 @@ export interface OlliSpec {
   mark?: OlliMark;
   axes?: OlliAxis[];
   legends?: OlliLegend[];
+  details?: OlliDetail[];
   facet?: string;
   // an optional initial top level selection query
   selection?: LogicalAnd<FieldPredicate> | FieldPredicate;
@@ -52,6 +53,14 @@ export interface OlliAxis extends Guide {
 export interface OlliLegend extends Guide {
   channel: 'color' | 'opacity' | 'size';
 }
+
+/**
+ * Extending the {@link Guide} interface for visualization detail encoding
+ */
+export interface OlliDetail extends Guide {
+  channel: 'detail';
+}
+
 
 export type MeasureType = 'quantitative' | 'ordinal' | 'nominal' | 'temporal';
 

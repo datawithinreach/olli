@@ -38,6 +38,11 @@ export function olliSpecToTree(olliSpec: OlliSpec): ElaboratedOlliNode {
     if (legend) {
       return 'legend';
     }
+    const detail = olliSpec.details?.find((l) => l.field === field);
+    if (detail) {
+      return 'detail';
+    }
+
     return 'other';
   }
 

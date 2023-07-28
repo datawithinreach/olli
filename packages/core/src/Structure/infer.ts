@@ -1,9 +1,10 @@
-import { OlliAxis, OlliLegend, OlliSpec } from '../Types';
+import { olli } from '..';
+import { OlliAxis, OlliDetail, OlliLegend, OlliSpec } from '../Types';
 import { getFieldDef } from '../util/data';
 import { OlliNode } from './Types';
 
 export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
-  function nodesFromGuides(axes: OlliAxis[], legends: OlliLegend[]): OlliNode[] {
+  function nodesFromGuides(axes: OlliAxis[], legends: OlliLegend[], details: OlliDetail[]): OlliNode[] {
     let nodes: OlliNode[] = [];
     if (axes) {
       nodes = nodes.concat(
@@ -19,14 +20,21 @@ export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
         })
       );
     }
+    if (details) {
+      nodes = nodes.concat(
+        details.map((detail) => {
+          return { groupby: detail.field, children: [] };
+        })
+      );
+    }
     return nodes;
   }
 
   if (olliSpec.facet) {
-    if (olliSpec.axes?.length || olliSpec.legends?.length) {
+    if (olliSpec.axes?.length || olliSpec.legends?.length || olliSpec.details?.length) {
       return {
         groupby: olliSpec.facet,
-        children: nodesFromGuides(olliSpec.axes, olliSpec.legends),
+        children: nodesFromGuides(olliSpec.axes, olliSpec.legends, olliSpec.details),
       };
     } else {
       return {
@@ -48,7 +56,8 @@ export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
         groupby: colorLegend.field,
         children: nodesFromGuides(
           olliSpec.axes,
-          olliSpec.legends.filter((legend) => legend !== colorLegend)
+          olliSpec.legends.filter((legend) => legend !== colorLegend),
+          olliSpec.details
         ),
       };
     }
@@ -57,7 +66,8 @@ export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
       const quantAxis = olliSpec.axes?.find((axis) => getFieldDef(axis.field, olliSpec.fields).type === 'quantitative');
       return nodesFromGuides(
         olliSpec.axes.filter((axis) => axis !== quantAxis),
-        olliSpec.legends
+        olliSpec.legends,
+        olliSpec.details
       );
     } else {
       const quantField = olliSpec.fields.find((field) => field.type === 'quantitative');
@@ -70,8 +80,8 @@ export function inferStructure(olliSpec: OlliSpec): OlliNode | OlliNode[] {
           };
         });
     }
-  } else if (olliSpec.axes?.length || olliSpec.legends?.length) {
-    return nodesFromGuides(olliSpec.axes, olliSpec.legends);
+  } else if (olliSpec.axes?.length || olliSpec.legends?.length || olliSpec.details?.length) {
+    return nodesFromGuides(olliSpec.axes, olliSpec.legends, olliSpec.details);
   } else {
     // TODO can try inferences with data mtypes
     // otherwise, just give all fields flat

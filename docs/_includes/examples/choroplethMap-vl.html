@@ -1,33 +1,75 @@
 <script type="module">
-    let spec = {
+    let spec =  {
         "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+        "width": 700,
+        "height": 500,
+        "title": {
+            "text": "Share of Population Receiving at Least One Dose",
+            "fontSize": 20
+        },
         "data": {
-            "url": "https://raw.githubusercontent.com/vega/vega-datasets/main/data/us-10m.json",
-            "format": {
-                "type": "topojson",
-                "feature": "counties"
-            }
+            "url": "https://raw.githubusercontent.com/Cian2001/irs_datasets/main/world_map.json",
+            "format": { "property": "features" }
         },
-        "transform": [{
-            "lookup": "id",
-            "from": {
-                "data": {
-                    "url": "https://raw.githubusercontent.com/vega/vega-datasets/main/data/unemployment.tsv"
-                },
-                "key": "id",
-                "fields": ["rate"]
+        "projection": { "type": "mercator" },
+        "transform": [
+            {
+                "calculate": "datum.properties.name === 'United States of America' ? 'United States' : datum.properties.name",
+                "as": "country"
+            },
+            {
+                "calculate": "datum.country === 'Dem. Rep. Congo' ? 'Democratic Republic of Congo' : datum.country",
+                "as": "country"
+            },
+            {
+                "calculate": "datum.country === 'Central African Rep.' ? 'Central African Republic' : datum.country",
+                "as": "country"
+            },
+            {
+                "lookup": "country",
+                "from": {
+                    "key": "location",
+                    "fields": ["people_fully_vaccinated_pct_of_pop_display"],
+                    "data": {
+                        "url": "https://static01.nytimes.com/newsgraphics/2021-01-19-world-vaccinations-tracker/ee760ac1a3dac05529f965f514aa9704eea80e79/_assets/latest.json",
+                        "format": { "type": "json", "parse": { "people_fully_vaccinated_pct_of_pop_display": "string" } }
+                    }
+                }
+            },
+            {
+                "calculate": "datum.people_fully_vaccinated_pct_of_pop_display ? toNumber(replace(datum.people_fully_vaccinated_pct_of_pop_display, /%\\*?$|\\*%$/, '')) : null",
+                "as": "people_fully_vaccinated_pct_of_pop_display"
+            },
+            {
+              "filter": {"field": "people_fully_vaccinated_pct_of_pop_display", "valid": true}
             }
-        }],
-        "projection": {
-            "type": "albersUsa"
+        ],
+        "mark": {
+            "type": "geoshape",
+            "stroke": "#141010",
+            "strokeWidth": 0.5
         },
-        "mark": "geoshape",
         "encoding": {
             "color": {
-                "field": "rate",
-                "type": "quantitative"
-            }
-        }
+                "title": "% of Population Vaccinated",
+                "field": "people_fully_vaccinated_pct_of_pop_display",
+                "type": "quantitative",
+                "scale": { "scheme": "redyellowgreen" }
+            },
+            "detail":{
+              "field":"country",
+              "title":"Country"
+            },
+            "tooltip": [
+                { "field": "properties.name", "title": "Country" },
+                {
+                    "field": "people_fully_vaccinated_pct_of_pop_display",
+                    "type": "quantitative",
+                    "title": "% of Population Vaccinated"
+                }
+            ]
+        },
+        "config": { "mark": { "invalid": null } }
     }
 
 

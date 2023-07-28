@@ -18,6 +18,7 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
     fields: [],
     axes: [],
     legends: [],
+    details: []
   };
   if ('mark' in spec) {
     // unit spec
@@ -73,7 +74,13 @@ export const VegaLiteAdapter: VisAdapter<TopLevelSpec> = async (spec: TopLevelSp
             field: fieldDef.field,
             title: encoding.title,
           });
-        } else {
+        } else if (olliSpec.mark === 'geoshape' && ['detail'].includes(channel)){
+          olliSpec.details.push({ // piggybacking on the legend
+            channel: channel as any,
+            field: fieldDef.field,
+            title: encoding.title,
+          })
+        }else {
           // TODO: handle other channels
           return;
         }
