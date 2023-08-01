@@ -128,7 +128,7 @@ function testPoint(datum: OlliDatum, entry: { unit?: string; fields: any; values
       case TYPE_ENUM:
         // Enumerated fields can either specify individual values (single/multi selections)
         // or an array of values (interval selections).
-        return !(isArray(values[i]) ? values[i].indexOf(dval) < 0 : dval !== values[i]);
+        return !(isArray(values[i]) ? values[i].indexOf(dval) < 0 : dval != values[i]);
       case TYPE_RANGE_INC:
         return inrange(dval as number, values[i], true, true);
       case TYPE_RANGE_RE:
